@@ -178,8 +178,10 @@ void playBots(Game &game){
             int cardIndex = validCards[rand() % validCards.size()];
             game.middleCard = game.Hands[i][cardIndex];
             game.Hands[i].erase(game.Hands[i].begin()+cardIndex);
-            if(game.Hands[i][cardIndex].CardVal == EIGHT) game.eightused = false;
+            if(game.Hands[i][cardIndex].CardVal == EIGHT) game.eightused = true;
             if(game.Hands[i][cardIndex].CardVal == ACE) {goto again;}
+        }else{
+            game.eightused = false;
         }
     }
 }
@@ -187,6 +189,7 @@ void playBots(Game &game){
 void playCard(Game &game){
     if((game.middleCard.CardVal != EIGHT) || (!game.eightused && game.middleCard.CardVal == EIGHT)){
         if(!(game.eightused && game.middleCard.CardVal == EIGHT)) game.eightused = true;
+        again_player:
         //check for special cards
         switch(game.middleCard.CardVal){
             case SEVEN:
@@ -225,12 +228,14 @@ void playCard(Game &game){
                 if(c->CardType == game.middleCard.CardType || c->CardVal == game.middleCard.CardVal){
                     game.middleCard = *c;
                     game.Hands[0].erase(game.Hands[0].begin()+cardIndex);
-                    if(c->CardVal == EIGHT) game.eightused = false;
-                    if(c->CardVal == ACE) {playCard(game);}
+                    if(c->CardVal == EIGHT) game.eightused = true;
+                    if(c->CardVal == ACE) {goto again_player;}
                     return;
                 }
             }
         }
+    }else{
+        game.eightused = false;
     }
 }
 

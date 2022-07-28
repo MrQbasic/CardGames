@@ -136,7 +136,7 @@ void printStats(Game &game){
 Card* getRandomCard(){
     struct Card* card = (struct Card*)malloc(sizeof(struct Card));
     card->CardType = rand() %  4;
-    card->CardVal  = rand() % 14;
+    card->CardVal  = 1 + rand() % 13;
     return card;
 }
 
@@ -144,6 +144,7 @@ void playBots(Game &game){
     for(int i=1; i<game.botCount+1; i++){
         if((game.middleCard.CardVal != EIGHT) || (!game.eightused && game.middleCard.CardVal == EIGHT)){
             if(!(game.eightused && game.middleCard.CardVal == EIGHT)) game.eightused = true;
+            again:
             //check for special cards
             switch(game.middleCard.CardVal){
                 case SEVEN:
@@ -176,8 +177,9 @@ void playBots(Game &game){
             }
             int cardIndex = validCards[rand() % validCards.size()];
             game.middleCard = game.Hands[i][cardIndex];
-            if(game.Hands[i][cardIndex].CardVal == EIGHT) game.eightused = false;
             game.Hands[i].erase(game.Hands[i].begin()+cardIndex);
+            if(game.Hands[i][cardIndex].CardVal == EIGHT) game.eightused = false;
+            if(game.Hands[i][cardIndex].CardVal == ACE) {goto again;}
         }
     }
 }
@@ -207,6 +209,10 @@ void playCard(Game &game){
             }
         }
         //print hand
+        printStats(game);
+        printf("Middle card: \n");
+        printCard(game.middleCard);
+        printf("\n\n");
         printHand(game);
         //get cardIndex from player input
         int cardIndex = -1;
@@ -218,8 +224,9 @@ void playCard(Game &game){
                 //check if card is ok to place
                 if(c->CardType == game.middleCard.CardType || c->CardVal == game.middleCard.CardVal){
                     game.middleCard = *c;
-                    if(game.Hands[0][cardIndex].CardVal == EIGHT) game.eightused = false;
                     game.Hands[0].erase(game.Hands[0].begin()+cardIndex);
+                    if(c->CardVal == EIGHT) game.eightused = false;
+                    if(c->CardVal == ACE) {playCard(game);}
                     return;
                 }
             }
@@ -261,11 +268,7 @@ int main(int argc, char** argv){
     //main game loop
     game.middleCard = *getRandomCard();
     game.over = false; 
-    while(!game.over){
-        printStats(game);
-        printf("Middle card: \n");
-        printCard(game.middleCard);
-        printf("\n\n"); 
+    while(!game.over){ 
         
         playCard(game);
         
